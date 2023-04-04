@@ -11,6 +11,8 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
+using Vehicleinsurance.Services.VehiclePolicyServices;
+using Vehicleinsurance.Services.VehicleServices;
 using VehicleInsurance_81380.Models;
 
 namespace Vehicleinsurance
@@ -33,6 +35,9 @@ namespace Vehicleinsurance
             {
                 options.SwaggerDoc("v1", new Swashbuckle.AspNetCore.Swagger.Info { Title = "Vehicle Insurance", Version = "v1" });
             });
+
+            services.AddScoped<IVehiclePolicyService, VehiclePolicyService>();
+            services.AddScoped<IVehicleService, VehicleService>();
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.

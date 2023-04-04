@@ -5,6 +5,8 @@ using System.Threading.Tasks;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using Vehicleinsurance.DTOs.VehiclePolicyDtos;
+using Vehicleinsurance.Services.VehiclePolicyServices;
 using VehicleInsurance_81380.Models;
 
 namespace Vehicleinsurance.Controllers
@@ -14,17 +16,19 @@ namespace Vehicleinsurance.Controllers
     public class VehiclePoliciesController : ControllerBase
     {
         private readonly VI_81380Context _context;
+        private readonly IVehiclePolicyService _vehiclePolicyService;
 
-        public VehiclePoliciesController(VI_81380Context context)
+        public VehiclePoliciesController(VI_81380Context context,IVehiclePolicyService vehiclePolicyService)
         {
             _context = context;
+            _vehiclePolicyService = vehiclePolicyService;
         }
 
         // GET: api/VehiclePolicies
         [HttpGet]
-        public IEnumerable<VehiclePolicy> GetVehiclePolicy()
+        public async Task<IEnumerable<VehiclePolicyGetDto>> GetVehiclePolicy()
         {
-            return _context.VehiclePolicy;
+            return await _vehiclePolicyService.GetVehicalePolicies();
         }
 
         // GET: api/VehiclePolicies/5
@@ -83,17 +87,16 @@ namespace Vehicleinsurance.Controllers
 
         // POST: api/VehiclePolicies
         [HttpPost]
-        public async Task<IActionResult> PostVehiclePolicy([FromBody] VehiclePolicy vehiclePolicy)
+        public async Task<IActionResult> PostVehiclePolicy([FromBody] VehiclePolicyPostDto vehiclePolicy)
         {
             if (!ModelState.IsValid)
             {
                 return BadRequest(ModelState);
             }
 
-            _context.VehiclePolicy.Add(vehiclePolicy);
-            await _context.SaveChangesAsync();
+            var created = await _vehiclePolicyService.PostVehicalPolicy(vehiclePolicy);
 
-            return CreatedAtAction("GetVehiclePolicy", new { id = vehiclePolicy.PolicyId }, vehiclePolicy);
+            return CreatedAtAction("GetVehiclePolicy", new { id = created.PolicyId }, created);
         }
 
         // DELETE: api/VehiclePolicies/5
@@ -105,14 +108,11 @@ namespace Vehicleinsurance.Controllers
                 return BadRequest(ModelState);
             }
 
-            var vehiclePolicy = await _context.VehiclePolicy.FindAsync(id);
+            var vehiclePolicy = await _vehiclePolicyService.DeleteVehiclePolicy(id);
             if (vehiclePolicy == null)
             {
                 return NotFound();
             }
-
-            _context.VehiclePolicy.Remove(vehiclePolicy);
-            await _context.SaveChangesAsync();
 
             return Ok(vehiclePolicy);
         }
